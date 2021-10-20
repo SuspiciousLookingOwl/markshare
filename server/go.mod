@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/c2fo/testify v0.0.0-20150827203832-fba96363964a // indirect
 	github.com/doug-martin/goqu v5.0.0+incompatible
+	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/graphql-go/graphql v0.8.0
 	github.com/jackc/pgx/v4 v4.13.0

@@ -18,12 +18,16 @@ func (u *MarkdownUseCases) Create(ctx context.Context, pl CreateUsecasePayload) 
 		return nil, errors.New("user not found")
 	}
 
-	markdown := &markdownDomains.Markdown{
-		ID:      "random234",
+	markdown, err := markdownDomains.NewMarkdown(&markdownDomains.Markdown{
+		ID:      "", // TODO: Generate
 		Content: pl.Content,
-		UserID:  ctx.Value("user_id").(string),
+		UserID:  userID,
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
-	err := u.mdRepo.Persist(*markdown)
+	err = u.mdRepo.Persist(*markdown)
 	return markdown, err
 }
