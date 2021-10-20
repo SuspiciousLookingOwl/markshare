@@ -8,7 +8,8 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/joho/godotenv"
 
-	app "github.com/suspiciouslookingowl/markshare/server/api"
+	server "github.com/suspiciouslookingowl/markshare/server/api"
+	app "github.com/suspiciouslookingowl/markshare/server/api/app"
 	authProviders "github.com/suspiciouslookingowl/markshare/server/auth/providers"
 	authusecases "github.com/suspiciouslookingowl/markshare/server/auth/use_cases"
 	"github.com/suspiciouslookingowl/markshare/server/config"
@@ -62,7 +63,7 @@ func main() {
 		),
 
 		// Start
-		fx.Invoke(app.StartServer),
+		fx.Invoke(server.StartServer),
 	).Run()
 
 }

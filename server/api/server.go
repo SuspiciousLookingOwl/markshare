@@ -9,34 +9,21 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/suspiciouslookingowl/markshare/server/api/app"
-	"github.com/suspiciouslookingowl/markshare/server/config"
-
 	"github.com/suspiciouslookingowl/markshare/server/api/mutations"
 	"github.com/suspiciouslookingowl/markshare/server/api/queries"
 	"github.com/suspiciouslookingowl/markshare/server/api/types"
-	authUsecase "github.com/suspiciouslookingowl/markshare/server/auth/use_cases"
-	markdownUseCases "github.com/suspiciouslookingowl/markshare/server/markdown/use_cases"
-	userUseCases "github.com/suspiciouslookingowl/markshare/server/user/use_cases"
-	"go.uber.org/fx"
+	c "github.com/suspiciouslookingowl/markshare/server/common"
+	"github.com/suspiciouslookingowl/markshare/server/config"
 )
 
-type param struct {
-	fx.In
-
-	*userUseCases.UserUseCases
-	*markdownUseCases.MarkdownUseCases
-	*authUsecase.AuthUseCases
+type postData struct {
+	Query     string                 `json:"query"`
+	Operation string                 `json:"operation"`
+	Variables map[string]interface{} `json:"variables"`
 }
 
-func NewApp(p param) *app.App {
-
-	app := &app.App{
-		UserUseCases:     *p.UserUseCases,
-		MarkdownUseCases: *p.MarkdownUseCases,
-		AuthUseCases:     *p.AuthUseCases,
-	}
-
-	var schema, _ = graphql.NewSchema(
+func newSchema(app *app.App) *graphql.Schema {
+	schema, _ := graphql.NewSchema(
 		graphql.SchemaConfig{
 			Query: graphql.NewObject(graphql.ObjectConfig{
 				Name: "Query",
@@ -63,19 +50,13 @@ func NewApp(p param) *app.App {
 			},
 		},
 	)
-
-	app.Schema = &schema
-
-	return app
+	return &schema
 }
 
-type postData struct {
-	Query     string                 `json:"query"`
-	Operation string                 `json:"operation"`
-	Variables map[string]interface{} `json:"variables"`
-}
+func StartServer(app *app.App, env *config.Env) {
 
-func StartServer(a *app.App, env *config.Env) {
+	schema := *newSchema(app)
+
 	http.HandleFunc("/graphql", func(w http.ResponseWriter, req *http.Request) {
 
 		// CORS
@@ -98,17 +79,17 @@ func StartServer(a *app.App, env *config.Env) {
 
 		authorization := strings.Split(req.Header.Get("Authorization"), " ")
 		if len(authorization) == 2 {
-			id, err := a.AuthUseCases.Verify(authorization[1])
+			id, err := app.AuthUseCases.Verify(authorization[1])
 			if err != nil {
 				w.WriteHeader(401)
 				return
 			}
-			ctx = context.WithValue(req.Context(), app.UserId, id)
+			ctx = context.WithValue(req.Context(), c.UserId, id)
 		}
 
 		result := graphql.Do(graphql.Params{
 			Context: ctx,
-			Schema:  *a.Schema,
+			Schema:  schema,
 
 			RequestString:  p.Query,
 			VariableValues: p.Variables,

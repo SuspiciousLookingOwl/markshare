@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	c "github.com/suspiciouslookingowl/markshare/server/common"
 	markdownDomains "github.com/suspiciouslookingowl/markshare/server/markdown/domains"
 )
 
@@ -12,7 +13,7 @@ type CreateUsecasePayload struct {
 }
 
 func (u *MarkdownUseCases) Create(ctx context.Context, pl CreateUsecasePayload) (*markdownDomains.Markdown, error) {
-	userID := ctx.Value("user_id").(string)
+	userID := ctx.Value(c.UserId).(string)
 	if userID == "" {
 		return nil, errors.New("user not found")
 	}
