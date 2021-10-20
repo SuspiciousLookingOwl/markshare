@@ -55,7 +55,7 @@ func NewApp(p param) *app.App {
 				},
 			}),
 			Types: []graphql.Type{
-				types.Markdown,
+				types.NewMarkdownType(app),
 				types.MarkdownConnection,
 				types.NewUserType(app),
 				types.UserConnection,

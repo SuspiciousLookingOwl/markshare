@@ -16,5 +16,9 @@ func (u *MarkdownUseCases) Retrieve(ctx context.Context, payload RetriveUsecaseP
 		IDs: []string{payload.ID},
 	})
 
+	if (len(*markdowns)) == 0 {
+		return nil, nil
+	}
+
 	return &(*markdowns)[0], nil
 }
