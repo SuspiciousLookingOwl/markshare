@@ -18,6 +18,7 @@ import (
 	userRepo "github.com/suspiciouslookingowl/markshare/server/user/repositories"
 	userUseCases "github.com/suspiciouslookingowl/markshare/server/user/use_cases"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -42,6 +43,19 @@ func main() {
 
 		// App
 		fx.Provide(app.NewApp),
+
+		// Logger
+		fx.Provide(func() *zap.SugaredLogger {
+			var logger *zap.Logger
+
+			if os.Getenv("ENV") == "production" {
+				logger, _ = zap.NewProduction()
+			} else {
+				logger, _ = zap.NewDevelopment()
+			}
+
+			return logger.Sugar()
+		}),
 
 		// Usecases
 		fx.Provide(

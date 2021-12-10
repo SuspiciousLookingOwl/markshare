@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -54,6 +53,8 @@ func newSchema(app *app.App) *graphql.Schema {
 }
 
 func StartServer(app *app.App, env *config.Env) {
+	defer app.Logger.Sync()
+	app.Logger.Info("Starting server")
 
 	schema := *newSchema(app)
 
@@ -74,6 +75,13 @@ func StartServer(app *app.App, env *config.Env) {
 			w.WriteHeader(400)
 			return
 		}
+
+		app.Logger.Debugw("New Request",
+			"method", req.Method,
+			"url", req.URL.Path,
+			"body", p,
+			"headers", req.Header,
+		)
 
 		ctx := req.Context()
 
@@ -97,10 +105,10 @@ func StartServer(app *app.App, env *config.Env) {
 		})
 
 		if err := json.NewEncoder(w).Encode(result); err != nil {
-			fmt.Printf("could not write result to response: %s", err)
+			app.Logger.Error("could not write result to response: %s", err)
 		}
 	})
 
-	fmt.Println("Now server is running on port ", env.Port)
+	app.Logger.Info("Server is running on port " + env.Port)
 	http.ListenAndServe(":"+env.Port, nil)
 }
